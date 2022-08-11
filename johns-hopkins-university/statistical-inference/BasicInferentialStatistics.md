@@ -210,13 +210,13 @@ t2
 # [1] 1.90643e-05
 ```
 
-In this case the p-value is equal to 1.90643e-05. Which allows us to reject $ H_0 $ even when the sample is smaller ($ \alpha $ is smaller).
+In this case the p-value is equal to 1.90643e-05. Which allows us to reject $ H_0 $ even when the sample is smaller.
 
 ##  Conclusions and Assumptions
 
 - The difference observed in the sample between the averages of tooth's length (len) by supplement type (supp) is not enough to reject the null hypothesis and to be considered statistically significant. So we can’t say that the supplement type has any correlation with tooth length.
 - The difference observed in the sample between the averages of tooth's length (len) by dose is enough to reject the null hypothesis in the case of doses of 0.5 and 1.0. So we can infer that to increase the dose from 0.5 to 1.0 has a correlation with tooth length. On the other hand we have to note tha this correlation has an high power that could allow us to get the same outcome even with smaller samples.
-- The difference observed in the sample between the averages of tooth's length (len) by d is enough to reject the null hypothesis in the case of doses of 1.0 and 2.0. So we can infer that to increase the dose from 1.0 to 2.0 has a correlation with tooth length. As in the previous case, we have to note that this correlation has an high power that could allow us to get the same outcome even with smaller samples ($ smaller \alpha $).
+- The difference observed in the sample between the averages of tooth's length (len) by d is enough to reject the null hypothesis in the case of doses of 1.0 and 2.0. So we can infer that to increase the dose from 1.0 to 2.0 has a correlation with tooth length. As in the previous case, we have to note that this correlation has an high power that could allow us to get the same outcome even with smaller samples.
 
 
 Eventually, we have we can state that it exist a very robust correlation between dose of the supplement and tooth length; while the correlation between supplement type and tooth length is unclear.
