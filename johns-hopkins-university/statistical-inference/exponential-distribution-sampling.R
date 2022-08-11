@@ -37,6 +37,8 @@ theoretical.var; sample.mean.var
 # Compare the sample mean variance to that of the theoretical variance
 abs(theoretical.var-sample.mean.var)
 
+
+# Plot the sample means
 library(ggplot2)
 
 ggplot(data.frame(y = sample.means), aes (x = y)) +
