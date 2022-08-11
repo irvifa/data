@@ -1,8 +1,11 @@
+# Load necessary package for the experiment.
+
 library(tidyverse)
 library(grid)
 library(gridExtra)
 library(flextable)
 
+# Understand the dataset attributes.
 str(ToothGrowth)
 
 summary(ToothGrowth$supp)
