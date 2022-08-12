@@ -1,4 +1,4 @@
-## Getting and Cleaning Data Project
+## Electric Power Consumption
 
 ### Description
 Additional information about the variables, data and transformations used in the course project for the Johns Hopkins Exploratory Data Analysis course.
