@@ -1,0 +1,128 @@
+---
+title: "Assignment: Prediction"
+date: '`r format(Sys.Date())`'
+link-citations: true
+output: md_document
+---
+
+## Background
+
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website [here](http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har) (see the section on the Weight Lifting Exercise Dataset).
+
+```{r}
+train_data_url = "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+test_data_url = "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+data_prefix_path = "data"
+# Create directory if not exist.
+if (!dir.exists(data_prefix_path)) {
+  dir.create(data_prefix_path)
+}
+train_local_data_path = paste(data_prefix_path, "train.csv", sep="/")
+test_local_data_path = paste(data_prefix_path, "test.csv", sep="/")
+# Download dataset from provided url
+download.file(train_data_url, train_local_data_path)
+download.file(test_data_url, test_local_data_path)
+```
+
+No we can load both of the test and train data:
+
+```{r}
+require(data.table)
+require(dplyr)
+require(caret)
+training <- tbl_df(fread(train_local_data_path,na.strings=c('#DIV/0!', '', 'NA')))
+testing  <- tbl_df(fread(test_local_data_path,na.strings=c('#DIV/0!', '', 'NA')))
+```
+
+Next, we will start train data into train and validation:
+
+```{r}
+set.seed(1234) # Don't forget the reproducibility!
+trainingDS <- createDataPartition( y = training$classe,
+                                   p = 0.7,
+                                   list = FALSE)
+actual.training <- training[trainingDS,]
+actual.validation <- training[-trainingDS,]
+```
+
+```{r}
+nzv <- nearZeroVar(actual.training)
+actual.training <- actual.training[,-nzv]
+actual.validation <- actual.validation[,-nzv]
+
+# Remove variables that are mostly NA
+mostlyNA <- sapply(actual.training,function(x) mean(is.na(x))) > 0.95
+actual.training <- actual.training[,mostlyNA==FALSE]
+actual.validation <- actual.validation[,mostlyNA==FALSE]
+
+# At this point we're already down to 59 variables from 160
+# See that the first 5 variables are identifiers that are
+# not probably useful for prediction so get rid of those
+# Dropping the total number of variables to 54 (53 for prediction)
+actual.training <- actual.training[,-(1:5)]
+actual.validation <- actual.validation[,-(1:5)]
+```
+
+Build the random forest model
+
+```{r}
+set.seed(1234)
+modelRF  <- train( classe ~.,
+                   data = actual.training,
+                   method = "rf",
+                   trControl = trainControl(method="cv",number=3) )
+# One can also build a generalized boosted model and compare its accuracy
+# to random forest model
+set.seed(1234)
+modelBM <- train( classe ~.,
+                  data = actual.training,
+                  method = "gbm",
+                  trControl = trainControl(method="repeatedcv",number = 5,repeats = 1),
+                  verbose = FALSE)
+```
+
+```{r}
+prediction.validation.rf <- predict(modelRF,actual.validation)
+confusionMatrix <- confusionMatrix(prediction.validation.rf,as.factor(actual.validation$classe))
+confusionMatrix
+```
+We can investigate our generalized boosted model a bit further to see which variables have the highest relative influence:
+
+```{r}
+summary(modelBM)
+```
+
+From above sumary, we understand that num_window, roll_belt, and pitch_forearm are the most performant ones. We can checkout a few plots demonstrating their power:
+
+```{r}
+qplot(num_window, roll_belt, data = actual.training, col = classe)
+```
+
+
+
+```{r}
+qplot(num_window, pitch_forearm, data = actual.training, col = classe)
+```
+
+```{r}
+qplot(roll_belt , pitch_forearm, data = actual.training, col = classe)
+```
+
+At this point we see the random forest has marginally better performance than the generalized boosted model. Hence using ensemble will be overengineering at this point. In any case they yield the same result. Let's test our model in the actual testing dataset:
+
+```{r}
+prediction.testing.rf <- predict(modelRF, testing)
+print(prediction.testing.rf)
+```
+
+
+## Sample Error
+
+Note that since the method random forest is chosen, there is no need for cross-validation or a separate test set to get an unbiased estimate of the test set error. This is explained as:
+
+> "In random forests, there is no need for cross-validation or a separate test set to get an unbiased estimate of the test set error. It is estimated internally, during the run, as follows:
+
+> Each tree is constructed using a different bootstrap sample from the original data. About one-third of the cases are left out of the bootstrap sample and not used in the construction of the kth tree.
+
+> Put each case left out in the construction of the kth tree down the kth tree to get a classification. In this way, a test set classification is obtained for each case in about one-third of the trees. At the end of the run, take j to be the class that got most of the votes every time case n was oob. The proportion of times that j is not equal to the true class of n averaged over all cases is the oob error estimate. This has proven to be unbiased in many tests."
