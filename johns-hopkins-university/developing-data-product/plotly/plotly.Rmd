@@ -1,0 +1,26 @@
+---
+title: "Data Visualization using Plotly"
+output: ioslides_presentation
+---
+
+# Data Visualization
+
+## Loading Data
+
+```{r}
+library(plotly)
+data("cars")
+summary(cars)
+```
+
+## Boxplot
+
+```{r, cars-1, fig.cap="Boxplot", echo=FALSE}
+plot_ly(cars, x = ~speed, type = "box")
+```
+
+## Scatterplot
+
+```{r, cars-2, fig.cap="Distance and Speed Relations in Cars", echo=FALSE}
+plot_ly(data=cars, x=~speed, y=~dist, mode = "markers", type="scatter")
+```

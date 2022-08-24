@@ -1,0 +1,26 @@
+---
+title: "R Notebook And Leaflet"
+output: html_notebook
+---
+
+```{r}
+date()
+```
+
+```{r}
+library(knitr)
+
+library(leaflet)
+
+library(dplyr)
+```
+
+
+This will represent the places where I would like to visit:install.packages('plotly')
+
+```{r}
+m <- leaflet(width = "100%") %>% addTiles() %>%  
+  addMarkers(lat= 25.0330, lng= 121.5654, popup="Taipei" ) %>%
+  addMarkers(lat= -6.4025, lng= 106.7942, popup="Depok" )
+(m)
+```
